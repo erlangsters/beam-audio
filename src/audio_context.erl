@@ -108,17 +108,25 @@ start(Opts) when is_map(Opts) ->
 -doc """
 Stop the audio context.
 
-It requests the worker to stop. Remaining native objects are released in
-`terminate/2`.
+It requests the worker to stop and waits until that process has exited.
+Remaining native objects are released in `terminate/2` before the wait
+returns.
 """.
 -spec stop() -> ok.
 stop() ->
     case whereis(?WORKER_NAME) of
         undefined ->
             ok;
-        _Pid ->
-            {reply, Reply} = worker:request(?WORKER_NAME, ?STOP_REQUEST),
-            Reply
+        Pid ->
+            Ref = monitor(process, Pid),
+            _ = worker:request(?WORKER_NAME, ?STOP_REQUEST),
+            receive
+                {'DOWN', Ref, process, Pid, _} ->
+                    ok
+            after 30000 ->
+                demonitor(Ref, [flush]),
+                ok
+            end
     end.
 
 -doc "The context worker pid, or `undefined`.".

@@ -495,24 +495,42 @@ static void recorder_dtor(ErlNifEnv *env, void *obj)
     destroy_mutex(&rec->lock);
 }
 
+static void engine_uninit_native(priv_t *priv, int engine, int context)
+{
+    if (engine) {
+        ma_engine_uninit(&priv->engine);
+    }
+    if (context) {
+        ma_context_uninit(&priv->context);
+    }
+}
+
 static void engine_teardown_locked(priv_t *priv)
 {
-    if (priv->engine_inited) {
-        ma_engine_uninit(&priv->engine);
-        priv->engine_inited = 0;
-    }
-    if (priv->context_inited) {
-        ma_context_uninit(&priv->context);
-        priv->context_inited = 0;
-    }
+    int engine = priv->engine_inited;
+    int context = priv->context_inited;
+
+    priv->engine_inited = 0;
+    priv->context_inited = 0;
     priv->started = 0;
+    enif_mutex_unlock(priv->lock);
+    engine_uninit_native(priv, engine, context);
+    enif_mutex_lock(priv->lock);
 }
 
 static void engine_teardown(priv_t *priv)
 {
+    int engine;
+    int context;
+
     enif_mutex_lock(priv->lock);
-    engine_teardown_locked(priv);
+    engine = priv->engine_inited;
+    context = priv->context_inited;
+    priv->engine_inited = 0;
+    priv->context_inited = 0;
+    priv->started = 0;
     enif_mutex_unlock(priv->lock);
+    engine_uninit_native(priv, engine, context);
 }
 
 static ma_result queue_on_read(ma_data_source *pDataSource, void *pFramesOut, ma_uint64 frameCount, ma_uint64 *pFramesRead)
