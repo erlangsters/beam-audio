@@ -1,0 +1,8 @@
+[{<<"spawn_mode">>,
+  {git,"https://github.com/erlangsters/spawn-mode",
+       {ref,"6591394154a5d4d316d5e7e02b93d99ebff6bef2"}},
+  1},
+ {<<"worker">>,
+  {git,"https://github.com/erlangsters/worker.git",
+       {ref,"266c385cf58b75a2bb7c2b4fe2897a2648914b82"}},
+  0}].

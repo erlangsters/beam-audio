@@ -1,0 +1,28 @@
+{application, beam_audio, [
+    {description, "The missing audio library of the BEAM ecosystem."},
+    {vsn, "0.0.1"},
+    {registered, []},
+    {applications, [
+        kernel,
+        stdlib,
+        worker
+    ]},
+    {env, []},
+    {modules, [
+        audio,
+        audio_clip,
+        audio_context,
+        audio_device,
+        audio_nif,
+        audio_player,
+        audio_recorder,
+        audio_samples,
+        audio_stream,
+        audio_wav,
+        beam_audio
+    ]},
+    {licenses, ["MIT"]},
+    {links, [
+        {"GitHub", "https://github.com/erlangsters/beam-audio"}
+    ]}
+]}.
