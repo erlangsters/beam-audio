@@ -24,9 +24,17 @@ roundtrip_test() ->
     {error, unsupported_format} = audio_wav:decode(<<"not a wav">>),
     ok.
 
+tmp_dir() ->
+    case os:getenv("TEMP") of
+        false ->
+            os:getenv("TMPDIR", "/tmp");
+        Dir ->
+            Dir
+    end.
+
 load_save_test() ->
     Samples = audio_samples:silence(f32, 16000, #{channels => 2, frames => 32}),
-    Path = filename:join(os:getenv("TMPDIR", "/tmp"), "beam-audio-wav-test.wav"),
+    Path = filename:join(tmp_dir(), "beam-audio-wav-test.wav"),
     ok = audio_wav:save(Samples, Path),
     {ok, Decoded} = audio_wav:load(Path),
     f32 = audio_samples:format(Decoded),

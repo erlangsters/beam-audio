@@ -20,9 +20,17 @@ with_null(Fun) ->
         ok = audio:terminate()
     end.
 
+tmp_dir() ->
+    case os:getenv("TEMP") of
+        false ->
+            os:getenv("TMPDIR", "/tmp");
+        Dir ->
+            Dir
+    end.
+
 tmp_wav() ->
     Samples = audio_samples:silence(s16, 8000, #{channels => 1, frames => 800}),
-    Path = filename:join(os:getenv("TMPDIR", "/tmp"), "beam-audio-stream.wav"),
+    Path = filename:join(tmp_dir(), "beam-audio-stream.wav"),
     ok = audio_wav:save(Samples, Path),
     Path.
 
